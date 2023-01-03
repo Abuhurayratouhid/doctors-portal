@@ -1,5 +1,5 @@
 import React from 'react';
-import chair from '../../assets/images/chair.png';
+import chair from '../../assets/images/dental-chair.jpg';
 import clock from '../../assets/icons/clock.svg';
 import phone from '../../assets/icons/phone.svg';
 import marker from '../../assets/icons/marker.svg';

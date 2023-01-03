@@ -1,10 +1,13 @@
 import { format } from 'date-fns';
-import React from 'react';
+import React, { useContext } from 'react';
+import toast from 'react-hot-toast';
+import { AuthContext } from '../../Context/AuthProvider';
 
 
-const BookingModal = ({ treatment, selectedDate,setTreatment }) => {
-    const { name, slots } = treatment;
+const BookingModal = ({ treatment, selectedDate,setTreatment,refetch }) => {
+    const { name, slots,price } = treatment;
     const date = format(selectedDate, 'PP')
+    const {user} = useContext(AuthContext)
 
     const handleModalForm = event => {
         event.preventDefault()
@@ -12,6 +15,7 @@ const BookingModal = ({ treatment, selectedDate,setTreatment }) => {
         const slot = form.slot.value;
         const name= form.name.value;
         const email= form.email.value;
+        const price = form.price.value;
         const phone = form.phone.value;
 
         const booking = {
@@ -20,10 +24,31 @@ const BookingModal = ({ treatment, selectedDate,setTreatment }) => {
             slot,
             name,
             email,
+            price,
             phone,
         }
-        setTreatment(null)
-        console.log(booking)
+
+        fetch('http://localhost:5000/bookings',{
+            method: 'POST',
+            headers: {
+                'content-type':'application/json'
+            },
+            body: JSON.stringify(booking)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.acknowledged){
+                toast.success('booking confirmed')
+                setTreatment(null)
+                refetch()
+            }
+            else{
+                toast.error(`${data.message}`)
+                setTreatment(null)
+            }
+            // console.log(data)
+        })
+        // console.log(booking)
     }
     return (
         <div>
@@ -44,8 +69,9 @@ const BookingModal = ({ treatment, selectedDate,setTreatment }) => {
                                      >{slot}</option>)
                                 }
                             </select>
-                            <input name='name' type="text" placeholder="Your Name" className="input input-bordered w-full mt-2" />
-                            <input name='email' type="email" placeholder="Email address" className="input input-bordered w-full mt-2" />
+                            <input name='name' type="text" defaultValue={user?.displayName} disabled placeholder="Your Name" className="input input-bordered w-full mt-2" />
+                            <input name='email' type="email"defaultValue={user?.email} disabled placeholder="Email address" className="input input-bordered w-full mt-2" />
+                            <input name='price' type="text" defaultValue={`Price: $${price}`} disabled className="input input-bordered w-full mt-2" />
                             <input name='phone' type="text" placeholder="Phone number" className="input input-bordered w-full mt-2" />
                             <br />
                             <input className='btn btn-accent w-full mt-2' type="submit" value="Submit" />
